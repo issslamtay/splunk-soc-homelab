@@ -1,0 +1,17 @@
+| ================================================
+| Rule: Privilege Escalation Detection
+| Author: [Your Name]
+| MITRE ATT&CK: TA0004 - Privilege Escalation
+| Severity: CRITICAL
+| Description: Detects when a user is granted admin
+|              privileges or added to Admins group
+| ================================================
+
+index=* sourcetype="WinEventLog:Security" (EventCode=4672 OR EventCode=4732)
+| eval action=case(
+    EventCode=4672, "Admin privileges used at login",
+    EventCode=4732, "User added to Administrators group")
+| eval severity="CRITICAL"
+| eval mitre_technique="TA0004 - Privilege Escalation"
+| table _time, Account_Name, ComputerName, action, severity, mitre_technique
+| sort -_time

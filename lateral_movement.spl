@@ -1,0 +1,20 @@
+| ================================================
+| Rule: Lateral Movement Detection
+| Author: [Your Name]
+| MITRE ATT&CK: T1550 - Use Alternate Auth Material
+| Severity: CRITICAL
+| Description: Detects one account authenticating
+|              to 3+ different machines via network
+|              logon - indicator of lateral movement
+| ================================================
+
+index=* sourcetype="WinEventLog:Security" EventCode=4624
+| where Logon_Type=3 AND Account_Name!="ANONYMOUS LOGON"
+| stats count dc(ComputerName) as unique_machines
+    values(ComputerName) as machines
+    by Account_Name, IpAddress
+| where unique_machines > 3
+| eval severity="CRITICAL"
+| eval mitre_technique="T1550 - Lateral Movement"
+| eval note="Single account accessed " + tostring(unique_machines) + " machines - investigate immediately"
+| sort -unique_machines

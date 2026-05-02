@@ -1,0 +1,19 @@
+| ================================================
+| Rule: Persistence - New User Account Created
+| Author: [Your Name]
+| MITRE ATT&CK: T1136 - Create Account
+| Severity: MEDIUM
+| Description: Detects creation of new accounts.
+|              Critical if account is immediately
+|              added to Administrators group (4720 + 4732)
+| ================================================
+
+index=* sourcetype="WinEventLog:Security" (EventCode=4720 OR EventCode=4732)
+| stats values(EventCode) as events, count, min(_time) as first_seen by Account_Name
+| eval severity=if(count >= 2, "CRITICAL", "MEDIUM")
+| eval note=if(count >= 2,
+    "Account created AND added to Admins - likely backdoor!",
+    "New account created - verify with HR")
+| eval mitre_technique="T1136 - Create Account"
+| table first_seen, Account_Name, events, severity, note
+| sort -first_seen

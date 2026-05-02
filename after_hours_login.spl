@@ -1,0 +1,17 @@
+| ================================================
+| Rule: Suspicious Login Outside Business Hours
+| Author: [Your Name]
+| MITRE ATT&CK: T1078 - Valid Accounts
+| Severity: MEDIUM
+| Description: Detects successful logins before 7:00
+|              or after 20:00, and on weekends
+| ================================================
+
+index=* sourcetype="WinEventLog:Security" EventCode=4624
+| eval hour=tonumber(strftime(_time, "%H"))
+| eval day=strftime(_time, "%A")
+| where (hour < 7 OR hour > 20) OR (day="Saturday" OR day="Sunday")
+| eval severity="MEDIUM"
+| eval mitre_technique="T1078 - Valid Accounts"
+| table _time, Account_Name, IpAddress, ComputerName, hour, day, severity
+| sort -_time

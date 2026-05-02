@@ -1,0 +1,16 @@
+| ================================================
+| Rule: Brute Force Attack Detection
+| Author: [Your Name]
+| MITRE ATT&CK: T1110 - Brute Force
+| Severity: HIGH
+| Description: Detects multiple failed login attempts
+|              from a single IP within 5 minutes
+| ================================================
+
+index=* sourcetype="WinEventLog:Security" EventCode=4625
+| bucket _time span=5m
+| stats count by _time, IpAddress, Account_Name
+| where count > 10
+| eval severity="HIGH"
+| eval mitre_technique="T1110 - Brute Force"
+| sort -count
